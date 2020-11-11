@@ -567,6 +567,9 @@ public class MyGui extends javax.swing.JFrame implements Runnable {
 		}
 	}
 
+	 public void log(String log) {
+		 System.out.println(log);
+	 }
 	/**
 	 * @param args the command line arguments
 	 */
