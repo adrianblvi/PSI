@@ -1,17 +1,10 @@
-import jade.core.AID;
 import jade.core.Agent;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
-import jade.lang.acl.ACLMessage;
 
-public class RandomAgent extends Agent {
-
-//	private State state;
-	private AID mainAgent;
-	private int myId;
-	private ACLMessage msg;
+public class TFT_agent extends Agent {
 
 	protected void setup() {
 //		state = State.s0NoConfig;
@@ -27,6 +20,6 @@ public class RandomAgent extends Agent {
 			fe.printStackTrace();
 		}
 //		addBehaviour(new Play());
-		System.out.println("RandomAgent " + getAID().getLocalName() + " is ready.");
+		System.out.println("TFTAgent " + getAID().getLocalName() + " is ready.");
 	}
 }

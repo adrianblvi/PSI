@@ -2,6 +2,7 @@
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.ArrayList;
 
 import javax.swing.JTextArea;
 import javax.swing.table.DefaultTableModel;
@@ -546,6 +547,7 @@ public class MyGui extends javax.swing.JFrame implements Runnable {
 		return answer;
 	}
 
+	
 	public void addTableRow() {
 		String[] decisions = new String[numPlayers];
 		for (int i = 0; i < numPlayers; i++) {

@@ -43,7 +43,8 @@ public class MainAgent extends Agent {
 		for (int i = 0; i < playerAgents.length; i++) {
 			playerNames.add(playerAgents[i].getLocalName());
 		}
-				
+		gui.log("Players names:");
+			
 	}
 
 	public class PlayerInformation {
