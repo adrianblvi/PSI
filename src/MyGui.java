@@ -35,6 +35,7 @@ class GuiOutputStream extends OutputStream {
  */
 public class MyGui extends javax.swing.JFrame implements Runnable {
 
+	private MainAgent mainAgent;
 	private Thread process;
 	private boolean stop;
 	private boolean toResume;
@@ -50,7 +51,8 @@ public class MyGui extends javax.swing.JFrame implements Runnable {
 	/**
 	 * Creates new form NewGui
 	 */
-	public MyGui() {
+	public MyGui(MainAgent agent) {
+		mainAgent = agent;
 		initComponents();
 		setLocationRelativeTo(null);// Posicion de la ventana en el centro
 		this.gamesPlayed = 0;
@@ -225,7 +227,7 @@ public class MyGui extends javax.swing.JFrame implements Runnable {
 
 		tablePlayers.setModel(new javax.swing.table.DefaultTableModel(new Object[][] {
 
-		}, new String[] { "Round", "Player 1", "Player 2", "Player 3", "Player 4" }) {
+		}, new String[] { "Players", "Player 1", "Player 2", "Player 3", "Player 4" }) {
 			Class[] types = new Class[] { java.lang.String.class, java.lang.String.class, java.lang.String.class,
 					java.lang.String.class, java.lang.String.class };
 
@@ -420,7 +422,6 @@ public class MyGui extends javax.swing.JFrame implements Runnable {
 				if (!stop) {
 					round = i;
 					System.out.println("Round: " + i);
-					addTableRow();
 					Thread.sleep(2000);
 				} else {
 					return;
@@ -454,9 +455,10 @@ public class MyGui extends javax.swing.JFrame implements Runnable {
 	}
 
 	private void newGameActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_newGameActionPerformed
-		System.out.println("New Game!");
-		clearTable();
-		startThread();
+		//System.out.println("New Game!");
+		mainAgent.newGame();
+		//clearTable();
+		//startThread();
 		btnStop.setEnabled(true);
 		btnResume.setEnabled(false);
 		newGame.setEnabled(false);
@@ -486,7 +488,8 @@ public class MyGui extends javax.swing.JFrame implements Runnable {
 	}// GEN-LAST:event_aboutActionPerformed
 
 	private void btnResumeActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnResumeActionPerformed
-		System.out.println("You clicked Resume!");
+		// System.out.println("You clicked Resume!");
+		mainAgent.setResume();
 		stop = false;
 		toResume = true;
 		btnResume.setEnabled(false);
@@ -496,7 +499,8 @@ public class MyGui extends javax.swing.JFrame implements Runnable {
 	}// GEN-LAST:event_btnResumeActionPerformed
 
 	private void btnStopActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnStopActionPerformed
-		System.out.println("You clicked Stop!");
+		// System.out.println("You clicked Stop!");
+		mainAgent.setStop();
 		stopThread();
 		btnResume.setEnabled(true);
 		btnStop.setEnabled(false);
@@ -526,52 +530,30 @@ public class MyGui extends javax.swing.JFrame implements Runnable {
 		clearTable();
 	}// GEN-LAST:event_resetPlayersActionPerformed
 
-	private String randomOption() {
-		int valorDado = (int) Math.floor(Math.random() * 2 + 1);
-		String answer = "";
-		switch (valorDado) {
-		case 1:
-			answer = "Betray";
-			betrayals++;
-			tpBetray.setText(String.valueOf(betrayals));
-			break;
-		case 2:
-			answer = "Confess";
-			confessions++;
-			tpConfessions.setText(String.valueOf(confessions));
-			break;
-		default:
-			answer = "Error";
-			break;
-		}
-		return answer;
-	}
-
-	
-	public void addTableRow() {
-		String[] decisions = new String[numPlayers];
-		for (int i = 0; i < numPlayers; i++) {
-			decisions[i] = randomOption();
-		}
-		// cambiar cuando se cambie numero de jugadores
-		Object[] row = { round, decisions[0], decisions[1], decisions[2], decisions[3] };
+	public void initTable(ArrayList<String> playersNames) {
 		DefaultTableModel model = (DefaultTableModel) tablePlayers.getModel();
-		model.addRow(row);
+
+		for (String name : playersNames) {
+			Object[] row = { name, 0, 0, 0, 0 };
+			model.addRow(row);
+		}
+
 	}
 
 	public void clearTable() {
-		if (gamesPlayed == 0) {
-			return;
-		} else {
-			System.out.println("Clearing table...");
-			DefaultTableModel model = (DefaultTableModel) tablePlayers.getModel();
-			model.setRowCount(0);
-		}
+//		if (gamesPlayed == 0) {
+//			return;
+//		} else {
+		System.out.println("Clearing table...");
+		DefaultTableModel model = (DefaultTableModel) tablePlayers.getModel();
+		model.setRowCount(0);
+		// }
 	}
 
-	 public void log(String log) {
-		 System.out.println(log);
-	 }
+	public void log(String log) {
+		System.out.println(log);
+	}
+
 	/**
 	 * @param args the command line arguments
 	 */
@@ -607,11 +589,11 @@ public class MyGui extends javax.swing.JFrame implements Runnable {
 		// </editor-fold>
 
 		/* Create and display the form */
-		java.awt.EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				new MyGui().setVisible(true);
-			}
-		});
+//		java.awt.EventQueue.invokeLater(new Runnable() {
+//			public void run() {
+//				new MyGui(MainAgent).setVisible(true);
+//			}
+//		});
 	}
 
 	// Variables declaration - do not modify//GEN-BEGIN:variables

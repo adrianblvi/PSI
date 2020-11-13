@@ -2,6 +2,7 @@ import java.util.ArrayList;
 
 import jade.core.AID;
 import jade.core.Agent;
+import jade.core.behaviours.SimpleBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -11,10 +12,11 @@ public class MainAgent extends Agent {
 	private MyGui gui;
 	private AID[] playerAgents;
 	private ArrayList<PlayerInformation> players = new ArrayList<>();
-	// private GameParametersStruct parameters = new GameParametersStruct();
+	private GameParametersStruct parameters = new GameParametersStruct();
+	private boolean stop = false;
 
 	protected void setup() {
-		gui = new MyGui();
+		gui = new MyGui(this);
 		gui.setVisible(true);
 		updatePlayers();
 
@@ -43,8 +45,61 @@ public class MainAgent extends Agent {
 		for (int i = 0; i < playerAgents.length; i++) {
 			playerNames.add(playerAgents[i].getLocalName());
 		}
-		gui.log("Players names:");
-			
+		gui.initTable(playerNames);
+//		gui.setPlayersUI(playerNames); Pendiente de saber que hace
+	}
+
+	public void resetStats() {
+
+	}
+
+	public void newGame() {
+		addBehaviour(new GameManager(this));
+		return;
+	}
+
+	public void setStop() {
+		gui.log("[MAIN AGENT]: Stop");
+		stop = true;
+	}
+
+	public void setResume() {
+		gui.log("[MAIN AGENT]: Resume");
+		stop = false;
+		doWake();
+	}
+
+	public class GameManager extends SimpleBehaviour {
+
+		public GameManager(Agent a) {
+			super(a);
+		}
+
+		@Override
+		public void action() {
+		}
+
+		@Override
+		public boolean done() {
+			return false;
+		}
+
+	}
+
+	public class GameParametersStruct {
+
+//		int E;
+		int N;
+		int R;
+		int NumGames;
+
+		public GameParametersStruct() {
+			// E = 40;
+			N = 5;
+			R = 10;
+			NumGames = 100;
+		}
+
 	}
 
 	public class PlayerInformation {
