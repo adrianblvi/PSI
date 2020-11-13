@@ -7,6 +7,7 @@ import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.lang.acl.ACLMessage;
 
 public class MainAgent extends Agent {
 	private MyGui gui;
@@ -45,6 +46,7 @@ public class MainAgent extends Agent {
 		for (int i = 0; i < playerAgents.length; i++) {
 			playerNames.add(playerAgents[i].getLocalName());
 		}
+		parameters.N = playerNames.size();
 		gui.initTable(playerNames);
 //		gui.setPlayersUI(playerNames); Pendiente de saber que hace
 	}
@@ -53,9 +55,9 @@ public class MainAgent extends Agent {
 
 	}
 
-	public void newGame() {
-		addBehaviour(new GameManager(this));
-		return;
+	public int newGame() {
+		addBehaviour(new GameManager());
+		return 0;
 	}
 
 	public void setStop() {
@@ -71,33 +73,44 @@ public class MainAgent extends Agent {
 
 	public class GameManager extends SimpleBehaviour {
 
-		public GameManager(Agent a) {
-			super(a);
-		}
-
 		@Override
 		public void action() {
+			// Assign the IDs
+			ArrayList<PlayerInformation> players = new ArrayList<>();
+			int lastId = 0;
+			for (AID a : playerAgents) {
+				players.add(new PlayerInformation(a, lastId++));
+			}
+			// Initialize (inform ID)
+			for (PlayerInformation player : players) {
+				ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+				msg.setContent("Id#" + player.id + "#" + parameters.N + "," + parameters.R);
+				msg.addReceiver(player.aid);
+				send(msg);
+			}
 		}
 
 		@Override
 		public boolean done() {
-			return false;
+			return true;
 		}
 
 	}
 
 	public class GameParametersStruct {
 
-//		int E;
 		int N;
+		int S;
 		int R;
-		int NumGames;
+		int I;
+		int P;
 
 		public GameParametersStruct() {
-			// E = 40;
-			N = 5;
-			R = 10;
-			NumGames = 100;
+			N = 2;
+			S = 4;
+			R = 50;
+			I = 0;
+			P = 10;
 		}
 
 	}
@@ -106,14 +119,12 @@ public class MainAgent extends Agent {
 
 		AID aid;
 		int id;
-		int gamesPlayed;
-		int gamesWin;
+//		int gamesPlayed;
+//		int gamesWin;
 
 		public PlayerInformation(AID a, int i) {
 			aid = a;
 			id = i;
-			gamesPlayed = 0;
-			gamesWin = 0;
 		}
 	}
 }
