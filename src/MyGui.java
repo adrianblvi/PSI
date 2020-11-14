@@ -227,7 +227,7 @@ public class MyGui extends javax.swing.JFrame implements Runnable {
 
 		tablePlayers.setModel(new javax.swing.table.DefaultTableModel(new Object[][] {
 
-		}, new String[] { "Players", "Player 1", "Player 2", "Player 3", "Player 4" }) {
+		}, new String[] { "Players", "Games", "Points", "Avg Points", "Games won" }) {
 			Class[] types = new Class[] { java.lang.String.class, java.lang.String.class, java.lang.String.class,
 					java.lang.String.class, java.lang.String.class };
 
@@ -455,10 +455,10 @@ public class MyGui extends javax.swing.JFrame implements Runnable {
 	}
 
 	private void newGameActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_newGameActionPerformed
-		//System.out.println("New Game!");
+		// System.out.println("New Game!");
 		mainAgent.newGame();
-		//clearTable();
-		//startThread();
+		// clearTable();
+		// startThread();
 		btnStop.setEnabled(true);
 		btnResume.setEnabled(false);
 		newGame.setEnabled(false);
@@ -540,14 +540,19 @@ public class MyGui extends javax.swing.JFrame implements Runnable {
 
 	}
 
+	public void updateTable(String games, String points) {
+
+	}
+
 	public void clearTable() {
-//		if (gamesPlayed == 0) {
-//			return;
-//		} else {
 		System.out.println("Clearing table...");
 		DefaultTableModel model = (DefaultTableModel) tablePlayers.getModel();
 		model.setRowCount(0);
 		// }
+	}
+
+	public void setNumberGames(int numGames) {
+		this.txpGamesPlayed.setText(String.valueOf(numGames));
 	}
 
 	public void log(String log) {

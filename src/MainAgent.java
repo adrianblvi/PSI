@@ -16,6 +16,7 @@ public class MainAgent extends Agent {
 	private GameParametersStruct parameters = new GameParametersStruct();
 	private boolean stop = false;
 	private int round = 0;
+	private boolean endAdvise = false;
 
 	protected void setup() {
 		gui = new MyGui(this);
@@ -84,7 +85,6 @@ public class MainAgent extends Agent {
 				players.add(new PlayerInformation(a, lastId++));
 			}
 
-			// Initialize (inform ID)
 			for (PlayerInformation player : players) {
 				ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 				msg.setContent("Id#" + player.id + "#" + parameters.N + "," + parameters.R);
@@ -92,14 +92,16 @@ public class MainAgent extends Agent {
 				send(msg);
 			}
 
-			for (int i = 0; i < players.size(); i++) {
-				for (int r = 0; r < parameters.R; r++) {
-					for (int j = i + 1; j < players.size(); j++) {
-						gui.log("Round: " + (round + 1) + "Game: " + (r + 1));
-						gui.log(players.get(i).id + "vs" + players.get(j).id);
+			for (int i = 0; i < players.size() - 1; i++) {
+				for (int j = i + 1; j < players.size(); j++) {
+					for (int r = 0; r < parameters.R; r++) {
+						gui.log("Agent: " + players.get(i).id + " vs Agent: " + players.get(j).id + " Game: "
+								+ (r + 1));
+						playGame(players.get(i), players.get(j));
 						round++;
-						// playGame(players.get(i), players.get(j));
+						gui.setNumberGames(round);
 					}
+
 				}
 			}
 		}
@@ -118,7 +120,8 @@ public class MainAgent extends Agent {
 
 			gui.log("Main Waiting for movement");
 			ACLMessage move1 = blockingReceive();
-			gui.log("Main Received " + move1.getContent() + " from " + move1.getSender().getName());
+			// gui.log("Main Received " + move1.getContent() + " from " +
+			// move1.getSender().getName());
 //			pos1 = Integer.parseInt(move1.getContent().split("#")[1]);
 			String action1 = move1.getContent().split("#")[1];
 
@@ -129,10 +132,61 @@ public class MainAgent extends Agent {
 
 			gui.log("Main Waiting for movement");
 			ACLMessage move2 = blockingReceive();
-			gui.log("Main Received " + move1.getContent() + " from " + move1.getSender().getName());
+			// gui.log("Main Received " + move1.getContent() + " from " +
+			// move1.getSender().getName());
 //			pos2 = Integer.parseInt(move1.getContent().split("#")[1]);
 			String action2 = move1.getContent().split("#")[1];
+			String payoff = calculatePayoff(action1, action2, player1, player2);
 
+			msg = new ACLMessage(ACLMessage.INFORM);
+			msg.addReceiver(player1.aid);
+			msg.addReceiver(player2.aid);
+			msg.setContent("Results#" + player1.id + "," + player2.id + "#" + payoff);
+			send(msg);
+
+		}
+
+		private String calculatePayoff(String action1, String action2, MainAgent.PlayerInformation player1,
+				MainAgent.PlayerInformation player2) {
+			String result = action1 + action2;
+			switch (result) {
+			case "CC":
+				System.out.println("Payoff:");
+				System.out.println("Player 1: 3");
+				player1.payoff += 3;
+				player1.gamesPlayed++;
+				System.out.println("Player 2: 3");
+				player2.payoff += 3;
+				player2.gamesPlayed++;
+				return "3,3";
+
+			case "CD":
+				System.out.println("Payoff:");
+				System.out.println("Player 1: 0");
+				System.out.println("Player 2: 5");
+				player2.payoff += 5;
+				player2.gamesPlayed++;
+				player1.gamesPlayed++;
+				return "0,5";
+			case "DC":
+				System.out.println("Payoff:");
+				System.out.println("Player 1: 5");
+				player1.payoff += 5;
+				player1.gamesPlayed++;
+				System.out.println("Player 2: 0");
+				player2.gamesPlayed++;
+				return "5,0";
+			case "DD":
+				System.out.println("Payoff:");
+				System.out.println("Player 1: 1");
+				player1.payoff += 1;
+				player1.gamesPlayed++;
+				System.out.println("Player 2: 1");
+				player2.payoff += 1;
+				player2.gamesPlayed++;
+				return "1,1";
+			}
+			return null;
 		}
 
 		@Override
@@ -145,15 +199,15 @@ public class MainAgent extends Agent {
 	public class GameParametersStruct {
 
 		int N;
-		int S;
 		int R;
-		int I;
-		int P;
+//		int S;
+//		int I;
+//		int P;
 
 		public GameParametersStruct() {
 			N = 2;
-			// S = 4;
 			R = 10;
+			// S = 4;
 			// I = 0;
 			// P = 10;
 		}
@@ -164,8 +218,9 @@ public class MainAgent extends Agent {
 
 		AID aid;
 		int id;
-//		int gamesPlayed;
-//		int gamesWin;
+		int payoff;
+		int gamesPlayed;
+		int gamesWin;
 
 		public PlayerInformation(AID a, int i) {
 			aid = a;
