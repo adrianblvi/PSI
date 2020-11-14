@@ -33,20 +33,10 @@ class GuiOutputStream extends OutputStream {
  *
  * @author Adrian Blanco
  */
-public class MyGui extends javax.swing.JFrame implements Runnable {
+public class MyGui extends javax.swing.JFrame {
 
 	private MainAgent mainAgent;
 	private Thread process;
-	private boolean stop;
-	private boolean toResume;
-	private int round;
-	private int defaultRounds = 10;
-	private int actualRounds;
-	private int numPlayers = 4;
-	private int defaultNumPLayers = 4;
-	private int gamesPlayed;
-	private int betrayals = 0;
-	private int confessions = 0;
 
 	/**
 	 * Creates new form NewGui
@@ -55,20 +45,14 @@ public class MyGui extends javax.swing.JFrame implements Runnable {
 		mainAgent = agent;
 		initComponents();
 		setLocationRelativeTo(null);// Posicion de la ventana en el centro
-		this.gamesPlayed = 0;
 		btnStop.setEnabled(false);
 		btnResume.setEnabled(false);
 		taVerbose.setEditable(false);
 		txpGamesPlayed.setEditable(false);
-		txpGamesPlayed.setText(String.valueOf(gamesPlayed));
 		txpNumPlayer.setEditable(false);
-		txpNumPlayer.setText(String.valueOf(numPlayers));
 		txpRounds.setEditable(false);
-		txpRounds.setText(String.valueOf(defaultRounds));
 		tpConfessions.setEditable(false);
-		tpConfessions.setText(String.valueOf(confessions));
 		tpBetray.setEditable(true);
-		tpBetray.setText(String.valueOf(betrayals));
 		GuiOutputStream rawout = new GuiOutputStream(taVerbose);
 		System.setOut(new PrintStream(rawout, true));
 
@@ -406,54 +390,6 @@ public class MyGui extends javax.swing.JFrame implements Runnable {
 		pack();
 	}// </editor-fold>//GEN-END:initComponents
 
-	@Override
-	public void run() {
-		int i = 0;
-		if (toResume) {
-			i = round;
-			toResume = false;
-		}
-		if (actualRounds == 0) {
-			actualRounds = defaultRounds;
-		}
-		while (i < actualRounds) {
-			try {
-				i++;
-				if (!stop) {
-					round = i;
-					System.out.println("Round: " + i);
-					Thread.sleep(2000);
-				} else {
-					return;
-				}
-			} catch (InterruptedException oIE) {
-			}
-		}
-		newGame.setEnabled(true);
-		btnStop.setEnabled(false);
-		round = 0;
-		gamesPlayed++;
-		txpGamesPlayed.setText(String.valueOf(gamesPlayed));
-		resetPlayers.setEnabled(true);
-		removePlayer.setEnabled(true);
-		stopThread();
-	}
-
-	public void startThread() {
-		if (process == null) {
-			process = new Thread(this);
-			process.start();
-			stop = false;
-		}
-	}
-
-	public void stopThread() {
-		if (process != null) {
-			stop = true;
-		}
-		process = null;
-	}
-
 	private void newGameActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_newGameActionPerformed
 		// System.out.println("New Game!");
 		mainAgent.newGame();
@@ -490,28 +426,25 @@ public class MyGui extends javax.swing.JFrame implements Runnable {
 	private void btnResumeActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnResumeActionPerformed
 		// System.out.println("You clicked Resume!");
 		mainAgent.setResume();
-		stop = false;
-		toResume = true;
+
 		btnResume.setEnabled(false);
 		btnStop.setEnabled(true);
 		newGame.setEnabled(false);
-		startThread();
 	}// GEN-LAST:event_btnResumeActionPerformed
 
 	private void btnStopActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnStopActionPerformed
 		// System.out.println("You clicked Stop!");
 		mainAgent.setStop();
-		stopThread();
 		btnResume.setEnabled(true);
 		btnStop.setEnabled(false);
 		newGame.setEnabled(true);
 	}// GEN-LAST:event_btnStopActionPerformed
 
 	private void btnOkRoundsActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnOkRoundsActionPerformed
-		actualRounds = Integer.valueOf(txNewRounds.getText());
-		if (actualRounds > 0) {
-			txpRounds.setText(String.valueOf(actualRounds));
-		}
+//		actualRounds = Integer.valueOf(txNewRounds.getText());
+//		if (actualRounds > 0) {
+//			txpRounds.setText(String.valueOf(actualRounds));
+//		}
 		jDialog1.dispose();
 	}// GEN-LAST:event_btnOkRoundsActionPerformed
 
@@ -525,8 +458,8 @@ public class MyGui extends javax.swing.JFrame implements Runnable {
 	}// GEN-LAST:event_txNewRoundsKeyTyped
 
 	private void resetPlayersActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_resetPlayersActionPerformed
-		numPlayers = defaultNumPLayers;
-		txpNumPlayer.setText(String.valueOf(numPlayers));
+//		numPlayers = defaultNumPLayers;
+//		txpNumPlayer.setText(String.valueOf(numPlayers));
 		clearTable();
 	}// GEN-LAST:event_resetPlayersActionPerformed
 
@@ -540,8 +473,17 @@ public class MyGui extends javax.swing.JFrame implements Runnable {
 
 	}
 
-	public void updateTable(String games, String points) {
-
+	public void updateTable(String name, String games, String points, String avg, String gamesWon) {
+		DefaultTableModel model = (DefaultTableModel) tablePlayers.getModel();
+		int rows = model.getRowCount();
+		for (int i = 0; i < rows; i++) {
+			if (model.getValueAt(i, 0).equals(name.trim())) {
+				model.setValueAt(games, i, 1);
+				model.setValueAt(points, i, 2);
+				model.setValueAt(avg, i, 3);
+				model.setValueAt(gamesWon, i, 4);
+			}
+		}
 	}
 
 	public void clearTable() {
@@ -553,6 +495,22 @@ public class MyGui extends javax.swing.JFrame implements Runnable {
 
 	public void setNumberGames(int numGames) {
 		this.txpGamesPlayed.setText(String.valueOf(numGames));
+	}
+
+	public void setNumberPlayers(int numPlayers) {
+		this.txpNumPlayer.setText(String.valueOf(numPlayers));
+	}
+
+	public void setNumConfess(int numConf) {
+		this.tpConfessions.setText(String.valueOf(numConf));
+	}
+
+	public void setNumBetray(int numBetray) {
+		this.tpBetray.setText(String.valueOf(numBetray));
+	}
+
+	public void setNumRounds(int numRounds) {
+		this.txpRounds.setText(String.valueOf(numRounds));
 	}
 
 	public void log(String log) {
