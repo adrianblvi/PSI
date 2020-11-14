@@ -15,6 +15,7 @@ public class MainAgent extends Agent {
 	private ArrayList<PlayerInformation> players = new ArrayList<>();
 	private GameParametersStruct parameters = new GameParametersStruct();
 	private boolean stop = false;
+	private int round = 0;
 
 	protected void setup() {
 		gui = new MyGui(this);
@@ -56,6 +57,7 @@ public class MainAgent extends Agent {
 	}
 
 	public int newGame() {
+		round = 0;
 		addBehaviour(new GameManager());
 		return 0;
 	}
@@ -89,10 +91,14 @@ public class MainAgent extends Agent {
 				msg.addReceiver(player.aid);
 				send(msg);
 			}
-			for (int r = 0; r < parameters.R; r++) {
-				for (int i = 0; i < players.size(); i++) {
+
+			for (int i = 0; i < players.size(); i++) {
+				for (int r = 0; r < parameters.R; r++) {
 					for (int j = i + 1; j < players.size(); j++) {
-						//playGame(players.get(i), players.get(j));
+						gui.log("Round: " + (round + 1) + "Game: " + (r + 1));
+						gui.log(players.get(i).id + "vs" + players.get(j).id);
+						round++;
+						// playGame(players.get(i), players.get(j));
 					}
 				}
 			}
@@ -105,8 +111,6 @@ public class MainAgent extends Agent {
 			msg.setContent("NewGame#" + player1.id + "," + player2.id);
 			send(msg);
 
-			int pos1, pos2;
-
 			msg = new ACLMessage(ACLMessage.REQUEST);
 			msg.setContent("Action");
 			msg.addReceiver(player1.aid);
@@ -115,7 +119,8 @@ public class MainAgent extends Agent {
 			gui.log("Main Waiting for movement");
 			ACLMessage move1 = blockingReceive();
 			gui.log("Main Received " + move1.getContent() + " from " + move1.getSender().getName());
-			pos1 = Integer.parseInt(move1.getContent().split("#")[1]);
+//			pos1 = Integer.parseInt(move1.getContent().split("#")[1]);
+			String action1 = move1.getContent().split("#")[1];
 
 			msg = new ACLMessage(ACLMessage.REQUEST);
 			msg.setContent("Action");
@@ -125,7 +130,9 @@ public class MainAgent extends Agent {
 			gui.log("Main Waiting for movement");
 			ACLMessage move2 = blockingReceive();
 			gui.log("Main Received " + move1.getContent() + " from " + move1.getSender().getName());
-			pos2 = Integer.parseInt(move1.getContent().split("#")[1]);
+//			pos2 = Integer.parseInt(move1.getContent().split("#")[1]);
+			String action2 = move1.getContent().split("#")[1];
+
 		}
 
 		@Override
