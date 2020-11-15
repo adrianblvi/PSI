@@ -63,7 +63,6 @@ public class MainAgent extends Agent {
 	}
 
 	public int newGame() {
-//		round = 0;
 		addBehaviour(new GameManager());
 		return 0;
 	}
@@ -205,6 +204,8 @@ public class MainAgent extends Agent {
 			send(msg);
 			gui.btnStop.setEnabled(false);
 			gui.newGame.setEnabled(true);
+			gui.removePlayer.setEnabled(true);
+			gui.resetPlayers.setEnabled(true);
 		}
 
 		private void updateTable(PlayerInformation player) {
