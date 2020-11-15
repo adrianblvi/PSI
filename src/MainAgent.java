@@ -16,7 +16,6 @@ public class MainAgent extends Agent {
 	private GameParametersStruct parameters = new GameParametersStruct();
 	private boolean stop = false;
 	private int round = 0;
-	private boolean endAdvise = false;
 	private int confesions = 0;
 	private int betrayals = 0;
 
@@ -64,7 +63,7 @@ public class MainAgent extends Agent {
 	}
 
 	public int newGame() {
-		round = 0;
+//		round = 0;
 		addBehaviour(new GameManager());
 		return 0;
 	}
@@ -100,8 +99,6 @@ public class MainAgent extends Agent {
 				for (int j = i + 1; j < players.size(); j++) {
 					for (int r = 0; r < parameters.R; r++) {
 						if (!stop) {
-							gui.log("Agent: " + players.get(i).id + " vs Agent: " + players.get(j).id + " Game: "
-									+ (r + 1));
 							playGame(players.get(i), players.get(j));
 							round++;
 							gui.setNumberGames(round);
@@ -160,39 +157,39 @@ public class MainAgent extends Agent {
 		private String calculatePayoff(String action1, String action2, MainAgent.PlayerInformation player1,
 				MainAgent.PlayerInformation player2) {
 			String result = action1 + action2;
+			String retResult = "";
 			switch (result) {
 			case "CC":
 				player1.payoff += 3;
-				player1.gamesPlayed++;
 				player2.payoff += 3;
-				player2.gamesPlayed++;
-				updateTable(player1);
-				updateTable(player2);
-				return "3,3";
+				confesions += 2;
+				retResult = "3,3";
+				break;
 			case "CD":
 				player2.payoff += 5;
-				player2.gamesPlayed++;
-				player1.gamesPlayed++;
-				updateTable(player1);
-				updateTable(player2);
-				return "0,5";
+				confesions++;
+				betrayals++;
+				retResult = "0,5";
+				break;
 			case "DC":
 				player1.payoff += 5;
-				player1.gamesPlayed++;
-				player2.gamesPlayed++;
-				updateTable(player1);
-				updateTable(player2);
-				return "5,0";
+				confesions++;
+				betrayals++;
+				retResult = "5,0";
+				break;
 			case "DD":
 				player1.payoff += 1;
-				player1.gamesPlayed++;
 				player2.payoff += 1;
-				player2.gamesPlayed++;
-				updateTable(player1);
-				updateTable(player2);
-				return "1,1";
+				betrayals += 2;
+				retResult = "1,1";
+				break;
 			}
-			return null;
+			player1.gamesPlayed++;
+			player2.gamesPlayed++;
+			gui.updateConfBetray(confesions, betrayals);
+			updateTable(player1);
+			updateTable(player2);
+			return retResult;
 		}
 
 		private void endGame(PlayerInformation player1, PlayerInformation player2) {
@@ -206,7 +203,8 @@ public class MainAgent extends Agent {
 			msg.addReceiver(player2.aid);
 			msg.setContent("GameOver#" + player1.id + "," + player2.id + "#" + avgTotal);
 			send(msg);
-
+			gui.btnStop.setEnabled(false);
+			gui.newGame.setEnabled(true);
 		}
 
 		private void updateTable(PlayerInformation player) {

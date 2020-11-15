@@ -1,4 +1,5 @@
 
+import java.awt.Dimension;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -44,6 +45,7 @@ public class MyGui extends javax.swing.JFrame {
 	public MyGui(MainAgent agent) {
 		mainAgent = agent;
 		initComponents();
+		setSize(new Dimension(700, 700)); // Window size
 		setLocationRelativeTo(null);// Posicion de la ventana en el centro
 		btnStop.setEnabled(false);
 		btnResume.setEnabled(false);
@@ -509,6 +511,11 @@ public class MyGui extends javax.swing.JFrame {
 		this.tpBetray.setText(String.valueOf(numBetray));
 	}
 
+	public void updateConfBetray(int conf, int betray) {
+		this.setNumConfess(conf);
+		this.setNumBetray(betray);
+	}
+
 	public void setNumRounds(int numRounds) {
 		this.txpRounds.setText(String.valueOf(numRounds));
 	}
@@ -561,9 +568,9 @@ public class MyGui extends javax.swing.JFrame {
 
 	// Variables declaration - do not modify//GEN-BEGIN:variables
 	private javax.swing.JMenuItem about;
-	private javax.swing.JButton btnOkRounds;
-	private javax.swing.JButton btnResume;
-	private javax.swing.JButton btnStop;
+	public javax.swing.JButton btnOkRounds;
+	public javax.swing.JButton btnResume;
+	public javax.swing.JButton btnStop;
 	private java.awt.Label consoleLbl;
 	private javax.swing.JMenu editMenu;
 	private javax.swing.JMenu helpMenu;
@@ -586,10 +593,10 @@ public class MyGui extends javax.swing.JFrame {
 	private javax.swing.JLabel lbGames;
 	private javax.swing.JLabel lbNumplayers;
 	private javax.swing.JLabel lblStatistics;
-	private javax.swing.JMenuItem newGame;
-	private javax.swing.JMenuItem numberRounds;
-	private javax.swing.JMenuItem removePlayer;
-	private javax.swing.JMenuItem resetPlayers;
+	public javax.swing.JMenuItem newGame;
+	public javax.swing.JMenuItem numberRounds;
+	public javax.swing.JMenuItem removePlayer;
+	public javax.swing.JMenuItem resetPlayers;
 	private javax.swing.JMenu startMenu;
 	private javax.swing.JTextArea taVerbose;
 	private javax.swing.JTable tablePlayers;
