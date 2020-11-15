@@ -1,3 +1,4 @@
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import jade.core.AID;
@@ -13,6 +14,7 @@ public class MainAgent extends Agent {
 	private MyGui gui;
 	private AID[] playerAgents;
 	private ArrayList<PlayerInformation> players = new ArrayList<>();
+	private ArrayList<String> avgList;
 	private GameParametersStruct parameters = new GameParametersStruct();
 	private boolean stop = false;
 	private int round = 0;
@@ -55,14 +57,17 @@ public class MainAgent extends Agent {
 		parameters.N = playerNames.size();
 		gui.setNumberPlayers(parameters.N);
 		gui.initTable(playerNames);
-//		gui.setPlayersUI(playerNames); Pendiente de saber que hace
 	}
 
 	public void resetStats() {
-
+		gui.setNumberGames(0);
+		gui.setNumConfess(0);
+		gui.setNumBetray(0);
+		gui.clearTable(false);
 	}
 
 	public int newGame() {
+		avgList = new ArrayList<>();
 		addBehaviour(new GameManager());
 		return 0;
 	}
@@ -74,6 +79,10 @@ public class MainAgent extends Agent {
 	public void setResume() {
 		stop = false;
 		doWake();
+	}
+
+	public void newNumRounds(int newNumRounds) {
+		parameters.R = newNumRounds;
 	}
 
 	public class GameManager extends SimpleBehaviour {
@@ -125,11 +134,8 @@ public class MainAgent extends Agent {
 			msg.addReceiver(player1.aid);
 			send(msg);
 
-			gui.log("Main Waiting for movement");
+			// gui.log("Main Waiting for movement");
 			ACLMessage move1 = blockingReceive();
-			// gui.log("Main Received " + move1.getContent() + " from " +
-			// move1.getSender().getName());
-//			pos1 = Integer.parseInt(move1.getContent().split("#")[1]);
 			String action1 = move1.getContent().split("#")[1];
 
 			msg = new ACLMessage(ACLMessage.REQUEST);
@@ -137,18 +143,14 @@ public class MainAgent extends Agent {
 			msg.addReceiver(player2.aid);
 			send(msg);
 
-			gui.log("Main Waiting for movement");
+			// gui.log("Main Waiting for movement");
 			ACLMessage move2 = blockingReceive();
-			// gui.log("Main Received " + move1.getContent() + " from " +
-			// move1.getSender().getName());
-//			pos2 = Integer.parseInt(move1.getContent().split("#")[1]);
-			String action2 = move1.getContent().split("#")[1];
-			String payoff = calculatePayoff(action1, action2, player1, player2);
-
+			String action2 = move2.getContent().split("#")[1];
+			avgList.add(calculatePayoff(action1, action2, player1, player2));
 			msg = new ACLMessage(ACLMessage.INFORM);
 			msg.addReceiver(player1.aid);
 			msg.addReceiver(player2.aid);
-			msg.setContent("Results#" + player1.id + "," + player2.id + "#" + payoff);
+			msg.setContent("Results#" + player1.id + "," + player2.id + "#" + action1 + "," + action2);
 			send(msg);
 
 		}
@@ -192,15 +194,13 @@ public class MainAgent extends Agent {
 		}
 
 		private void endGame(PlayerInformation player1, PlayerInformation player2) {
-			float avgPlayer1, avgPlayer2;
-			avgPlayer1 = player1.payoff / player1.gamesPlayed;
-			avgPlayer2 = player2.payoff / player2.gamesPlayed;
-			String avgTotal = avgPlayer1 + "," + avgPlayer2;
 
+			String avgTotal = obtainAvgGame();
 			ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 			msg.addReceiver(player1.aid);
 			msg.addReceiver(player2.aid);
 			msg.setContent("GameOver#" + player1.id + "," + player2.id + "#" + avgTotal);
+			System.out.println("GameOver#" + player1.id + "," + player2.id + "#" + avgTotal);
 			send(msg);
 			gui.btnStop.setEnabled(false);
 			gui.newGame.setEnabled(true);
@@ -208,9 +208,21 @@ public class MainAgent extends Agent {
 			gui.resetPlayers.setEnabled(true);
 		}
 
+		private String obtainAvgGame() {
+			float avgPlayer1 = 0, avgPlayer2 = 0;
+			for (String string : avgList) {
+				String[] avgAux = string.split(",");
+				avgPlayer1 += Integer.parseInt(avgAux[0]);
+				avgPlayer2 += Integer.parseInt(avgAux[1]);
+			}
+			DecimalFormat format = new DecimalFormat("#.##");
+			String toRet = format.format((avgPlayer1 / avgList.size())) + ","
+					+ format.format((avgPlayer2 / avgList.size()));
+			return toRet;
+		}
+
 		private void updateTable(PlayerInformation player) {
 			float avg = (float) player.payoff / player.gamesPlayed;
-			System.out.println("AVG: " + avg);
 			gui.updateTable(String.valueOf(player.aid.getLocalName()), String.valueOf(player.gamesPlayed),
 					String.valueOf(player.payoff), String.valueOf(avg), String.valueOf(player.gamesWin));
 		}

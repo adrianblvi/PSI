@@ -51,12 +51,9 @@ public class RandomAgent extends Agent {
 
 		@Override
 		public void action() {
-//			System.out.println(getAID().getName() + ":" + state.name());
 			msg = blockingReceive();
 			if (msg != null) {
-				// System.out.println(
-				// getAID().getName() + " received " + msg.getContent() + " from " +
-				// msg.getSender().getName());
+
 				switch (state) {
 				case s0NoConfig:
 					if (msg.getContent().startsWith("Id#") && msg.getPerformative() == ACLMessage.INFORM) {
@@ -90,10 +87,9 @@ public class RandomAgent extends Agent {
 							}
 							if (gameStarted)
 								state = State.s2Round;
+						} else if (msg.getContent().startsWith("GameOver#")) {
+							System.out.println("THE END");
 						}
-					} else if (msg.getContent().startsWith("GameOver#")) {
-						System.out.println("Game seems to be finsihed");
-						state = State.s0NoConfig;
 					} else {
 						System.out.println(getAID().getName() + ":" + state.name() + " - Unexpected message");
 					}
@@ -104,13 +100,15 @@ public class RandomAgent extends Agent {
 						msg.addReceiver(mainAgent);
 						msg.setContent("Action#" + randomOption());// In other agents is here where he have to codify
 																	// the decission
-						System.out.println(getAID().getName() + " sent " + msg.getContent());
+						// System.out.println(getAID().getName() + " sent " + msg.getContent());
 						send(msg);
 						state = State.s3AwaitingResult;
 					} else if (msg.getPerformative() == ACLMessage.INFORM && msg.getContent().startsWith("Changed#")) {
 						// Process changed message, in this case nothing
-					} else if (msg.getPerformative() == ACLMessage.INFORM && msg.getContent().startsWith("EndGame")) {
-						state = State.s1AwaitingGame;
+					} else if (msg.getPerformative() == ACLMessage.INFORM && msg.getContent().startsWith("GameOver#")) {
+						// state = State.s1AwaitingGame;
+						System.out.println("Fin de la partida");
+						state = State.s0NoConfig;
 					} else {
 						System.out.println(
 								getAID().getName() + ":" + state.name() + " - Unexpected message:" + msg.getContent());
@@ -131,7 +129,7 @@ public class RandomAgent extends Agent {
 		}
 
 		private void validateResultMessage(ACLMessage msg) {
-			System.out.println("Processing the results... ");
+			// System.out.println("Processing the results... ");
 
 		}
 
@@ -168,17 +166,10 @@ public class RandomAgent extends Agent {
 				return false;
 			tN = Integer.parseInt(parametersSplit[0]);
 			tR = Integer.parseInt(parametersSplit[1]);
-//			tS = Integer.parseInt(parametersSplit[1]);
-//			tI = Integer.parseInt(parametersSplit[3]);
-//			tP = Integer.parseInt(parametersSplit[4]);
 
-			// At this point everything should be fine, updating class variables
 			mainAgent = msg.getSender();
 			N = tN;
 			R = tR;
-//			S = tS;
-//			I = tI;
-//			P = tP;
 			myId = tMyId;
 			return true;
 		}

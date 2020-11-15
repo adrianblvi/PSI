@@ -118,11 +118,7 @@ public class MyGui extends javax.swing.JFrame {
 
 		txNewRounds.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 		txNewRounds.setAutoscrolls(false);
-		txNewRounds.addKeyListener(new java.awt.event.KeyAdapter() {
-			public void keyTyped(java.awt.event.KeyEvent evt) {
-				txNewRoundsKeyTyped(evt);
-			}
-		});
+
 		jScrollPane6.setViewportView(txNewRounds);
 
 		btnOkRounds.setText("Ok");
@@ -393,10 +389,8 @@ public class MyGui extends javax.swing.JFrame {
 	}// </editor-fold>//GEN-END:initComponents
 
 	private void newGameActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_newGameActionPerformed
-		// System.out.println("New Game!");
+
 		mainAgent.newGame();
-		// clearTable();
-		// startThread();
 		btnStop.setEnabled(true);
 		btnResume.setEnabled(false);
 		newGame.setEnabled(false);
@@ -426,16 +420,13 @@ public class MyGui extends javax.swing.JFrame {
 	}// GEN-LAST:event_aboutActionPerformed
 
 	private void btnResumeActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnResumeActionPerformed
-		// System.out.println("You clicked Resume!");
 		mainAgent.setResume();
-
 		btnResume.setEnabled(false);
 		btnStop.setEnabled(true);
 		newGame.setEnabled(false);
 	}// GEN-LAST:event_btnResumeActionPerformed
 
 	private void btnStopActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnStopActionPerformed
-		// System.out.println("You clicked Stop!");
 		mainAgent.setStop();
 		btnResume.setEnabled(true);
 		btnStop.setEnabled(false);
@@ -443,26 +434,17 @@ public class MyGui extends javax.swing.JFrame {
 	}// GEN-LAST:event_btnStopActionPerformed
 
 	private void btnOkRoundsActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnOkRoundsActionPerformed
-//		actualRounds = Integer.valueOf(txNewRounds.getText());
-//		if (actualRounds > 0) {
-//			txpRounds.setText(String.valueOf(actualRounds));
-//		}
+		int newNumRounds = Integer.valueOf(txNewRounds.getText());
+		if (newNumRounds > 0) {
+			this.setNumRounds(newNumRounds);
+			mainAgent.newNumRounds(newNumRounds);
+
+		}
 		jDialog1.dispose();
 	}// GEN-LAST:event_btnOkRoundsActionPerformed
 
-	private void txNewRoundsKeyTyped(java.awt.event.KeyEvent evt) {// GEN-FIRST:event_txNewRoundsKeyTyped
-		if (txNewRounds.getText().isEmpty()) {
-			btnOkRounds.setEnabled(false);
-		} else {
-			btnOkRounds.setEnabled(true);
-			System.out.println(txNewRounds.getText());
-		}
-	}// GEN-LAST:event_txNewRoundsKeyTyped
-
 	private void resetPlayersActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_resetPlayersActionPerformed
-//		numPlayers = defaultNumPLayers;
-//		txpNumPlayer.setText(String.valueOf(numPlayers));
-		clearTable();
+		mainAgent.resetStats();
 	}// GEN-LAST:event_resetPlayersActionPerformed
 
 	public void initTable(ArrayList<String> playersNames) {
@@ -488,11 +470,19 @@ public class MyGui extends javax.swing.JFrame {
 		}
 	}
 
-	public void clearTable() {
-		System.out.println("Clearing table...");
+	public void clearTable(boolean eraseAll) {
 		DefaultTableModel model = (DefaultTableModel) tablePlayers.getModel();
-		model.setRowCount(0);
-		// }
+		if (eraseAll) {
+			model.setRowCount(0);
+		} else {
+			int rows = model.getRowCount();
+			for (int i = 0; i < rows; i++) {
+				model.setValueAt(0, i, 1);
+				model.setValueAt(0, i, 2);
+				model.setValueAt(0, i, 3);
+				model.setValueAt(0, i, 4);
+			}
+		}
 	}
 
 	public void setNumberGames(int numGames) {
