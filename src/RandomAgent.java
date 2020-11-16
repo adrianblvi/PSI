@@ -1,3 +1,6 @@
+import java.io.FileWriter;
+import java.io.PrintWriter;
+
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
@@ -30,8 +33,27 @@ public class RandomAgent extends Agent {
 			fe.printStackTrace();
 		}
 		addBehaviour(new Play());
-		System.out.println("RandomAgent " + getAID().getName() + " is ready.");
+		writeLog("RandomAgent " + getAID().getName() + " is ready.");
 
+	}
+
+	private void writeLog(String log) {
+		FileWriter fichero = null;
+		PrintWriter pw = null;
+		try {
+			fichero = new FileWriter("log.txt", true);
+			pw = new PrintWriter(fichero);
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				pw.write(log + "\n");
+				if (null != fichero)
+					fichero.close();
+			} catch (Exception e2) {
+				e2.printStackTrace();
+			}
+		}
 	}
 
 	protected void takeDown() {
@@ -100,7 +122,7 @@ public class RandomAgent extends Agent {
 						msg.addReceiver(mainAgent);
 						msg.setContent("Action#" + randomOption());// In other agents is here where he have to codify
 																	// the decission
-						// System.out.println(getAID().getName() + " sent " + msg.getContent());
+						writeLog(getAID().getName() + " sent " + msg.getContent());
 						send(msg);
 						state = State.s3AwaitingResult;
 					} else if (msg.getPerformative() == ACLMessage.INFORM && msg.getContent().startsWith("Changed#")) {

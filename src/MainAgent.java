@@ -1,3 +1,5 @@
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
@@ -85,6 +87,25 @@ public class MainAgent extends Agent {
 		parameters.R = newNumRounds;
 	}
 
+	private void writeLog(String log) {
+		FileWriter fichero = null;
+		PrintWriter pw = null;
+		try {
+			fichero = new FileWriter("log.txt", true);
+			pw = new PrintWriter(fichero);
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				pw.write(log + "\n");
+				if (null != fichero)
+					fichero.close();
+			} catch (Exception e2) {
+				e2.printStackTrace();
+			}
+		}
+	}
+
 	public class GameManager extends SimpleBehaviour {
 
 		@Override
@@ -95,7 +116,9 @@ public class MainAgent extends Agent {
 			for (AID a : playerAgents) {
 				players.add(new PlayerInformation(a, lastId++));
 			}
-
+			for (PlayerInformation playerInformation : players) {
+				writeLog(playerInformation.aid.getLocalName() + " " + playerInformation.id);
+			}
 			for (PlayerInformation player : players) {
 				ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 				msg.setContent("Id#" + player.id + "#" + parameters.N + "," + parameters.R);
@@ -128,6 +151,7 @@ public class MainAgent extends Agent {
 			msg.addReceiver(player2.aid);
 			msg.setContent("NewGame#" + player1.id + "," + player2.id);
 			send(msg);
+			writeLog("NewGame#" + player1.id + "," + player2.id);
 
 			msg = new ACLMessage(ACLMessage.REQUEST);
 			msg.setContent("Action");
@@ -152,7 +176,7 @@ public class MainAgent extends Agent {
 			msg.addReceiver(player2.aid);
 			msg.setContent("Results#" + player1.id + "," + player2.id + "#" + action1 + "," + action2);
 			send(msg);
-
+			writeLog("Results#" + player1.id + "," + player2.id + "#" + action1 + "," + action2);
 		}
 
 		private String calculatePayoff(String action1, String action2, MainAgent.PlayerInformation player1,
@@ -200,7 +224,7 @@ public class MainAgent extends Agent {
 			msg.addReceiver(player1.aid);
 			msg.addReceiver(player2.aid);
 			msg.setContent("GameOver#" + player1.id + "," + player2.id + "#" + avgTotal);
-			System.out.println("GameOver#" + player1.id + "," + player2.id + "#" + avgTotal);
+			writeLog("GameOver#" + player1.id + "," + player2.id + "#" + avgTotal);
 			send(msg);
 			gui.btnStop.setEnabled(false);
 			gui.newGame.setEnabled(true);

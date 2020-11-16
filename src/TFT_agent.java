@@ -1,3 +1,6 @@
+import java.io.FileWriter;
+import java.io.PrintWriter;
+
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
@@ -18,7 +21,6 @@ public class TFT_agent extends Agent {
 
 	protected void setup() {
 		state = State.s0NoConfig;
-
 		DFAgentDescription dfd = new DFAgentDescription();
 		dfd.setName(getAID());
 		ServiceDescription sd = new ServiceDescription();
@@ -31,8 +33,7 @@ public class TFT_agent extends Agent {
 			fe.printStackTrace();
 		}
 		addBehaviour(new Play());
-		System.out.println("TFTAgent " + getAID().getName() + " is ready.");
-
+		writeLog("TFTAgent " + getAID().getName() + " is ready.");
 	}
 
 	protected void takeDown() {
@@ -46,6 +47,25 @@ public class TFT_agent extends Agent {
 
 	private enum State {
 		s0NoConfig, s1AwaitingGame, s2Round, s3AwaitingResult
+	}
+
+	private void writeLog(String log) {
+		FileWriter fichero = null;
+		PrintWriter pw = null;
+		try {
+			fichero = new FileWriter("log.txt", true);
+			pw = new PrintWriter(fichero);
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				pw.write(log + "\n");
+				if (null != fichero)
+					fichero.close();
+			} catch (Exception e2) {
+				e2.printStackTrace();
+			}
+		}
 	}
 
 	private class Play extends CyclicBehaviour {
@@ -100,7 +120,7 @@ public class TFT_agent extends Agent {
 						msg.addReceiver(mainAgent);
 						msg.setContent("Action#" + Action());// In other agents is here where he have to codify
 																// the decission
-						System.out.println(getAID().getName() + " sent " + msg.getContent());
+						writeLog(getAID().getName() + " sent " + msg.getContent());
 						send(msg);
 						state = State.s3AwaitingResult;
 					} else if (msg.getPerformative() == ACLMessage.INFORM && msg.getContent().startsWith("Changed#")) {
@@ -132,9 +152,9 @@ public class TFT_agent extends Agent {
 			String[] contentSplit = msgContent.split("#");
 			String[] idSplit = contentSplit[1].trim().split(",");
 			if (Integer.parseInt(idSplit[0]) == myId)
-				pos = 0;
-			else
 				pos = 1;
+			else
+				pos = 0;
 
 			String[] actions = contentSplit[2].trim().split(",");
 			oppAction = actions[pos];
