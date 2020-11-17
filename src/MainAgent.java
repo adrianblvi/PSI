@@ -85,6 +85,12 @@ public class MainAgent extends Agent {
 
 	public void newNumRounds(int newNumRounds) {
 		parameters.R = newNumRounds;
+		parameters.modifiedR();
+
+	}
+
+	public void deletePlayer() {
+
 	}
 
 	private void writeLog(String log) {
@@ -124,11 +130,13 @@ public class MainAgent extends Agent {
 				msg.setContent("Id#" + player.id + "#" + parameters.N + "," + parameters.R);
 				msg.addReceiver(player.aid);
 				send(msg);
+				writeLog("Id#" + player.id + "#" + parameters.N + "," + parameters.R);
 			}
-
+			int actualRound = parameters.R;
+			int newRound = parameters.R;
 			for (int i = 0; i < players.size() - 1; i++) {
 				for (int j = i + 1; j < players.size(); j++) {
-					for (int r = 0; r < parameters.R; r++) {
+					for (int r = 0; r < newRound; r++) {
 						if (!stop) {
 							playGame(players.get(i), players.get(j));
 							round++;
@@ -140,7 +148,10 @@ public class MainAgent extends Agent {
 							doWait();
 						}
 					}
-
+					int modification = (int) Math.floor(Math.random() * (parameters.nR) + 1);
+					System.out.println("Modification number: " + modification);
+					newRound = actualRound - modification;
+					System.out.println("Actual round updated: " + newRound);
 				}
 			}
 		}
@@ -158,7 +169,6 @@ public class MainAgent extends Agent {
 			msg.addReceiver(player1.aid);
 			send(msg);
 
-			// gui.log("Main Waiting for movement");
 			ACLMessage move1 = blockingReceive();
 			String action1 = move1.getContent().split("#")[1];
 
@@ -167,7 +177,6 @@ public class MainAgent extends Agent {
 			msg.addReceiver(player2.aid);
 			send(msg);
 
-			// gui.log("Main Waiting for movement");
 			ACLMessage move2 = blockingReceive();
 			String action2 = move2.getContent().split("#")[1];
 			avgList.add(calculatePayoff(action1, action2, player1, player2));
@@ -262,12 +271,19 @@ public class MainAgent extends Agent {
 
 		int N;
 		int R;
+		int nR;
 
 		public GameParametersStruct() {
 			N = 2;
 			R = 20;
+			nR = (int) (R - (0.9 * R));
+
 		}
 
+		private void modifiedR() {
+			nR = (int) (R - (0.9 * R));
+			System.out.println("NR: " + nR);
+		}
 	}
 
 	public class PlayerInformation {

@@ -402,7 +402,7 @@ public class MyGui extends javax.swing.JFrame {
 		jDialog1.setVisible(true);
 		jDialog1.setSize(361, 120);
 		jDialog1.setLocationRelativeTo(null);
-		btnOkRounds.setEnabled(false);
+		btnOkRounds.setEnabled(true);
 	}// GEN-LAST:event_numberRoundsActionPerformed
 
 	private void verboseActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_verboseActionPerformed

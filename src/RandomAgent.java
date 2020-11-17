@@ -110,7 +110,6 @@ public class RandomAgent extends Agent {
 							if (gameStarted)
 								state = State.s2Round;
 						} else if (msg.getContent().startsWith("GameOver#")) {
-							System.out.println("THE END");
 						}
 					} else {
 						System.out.println(getAID().getName() + ":" + state.name() + " - Unexpected message");
