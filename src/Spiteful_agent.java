@@ -89,6 +89,8 @@ public class Spiteful_agent extends Agent {
 						if (parametersUpdated)
 							state = State.s1AwaitingGame;
 
+					} else if (msg.getPerformative() == ACLMessage.INFORM && msg.getContent().startsWith("Removed")) {
+						doDelete();
 					} else {
 						System.out.println(getAID().getName() + ":" + state.name() + " - Unexpected message");
 					}
@@ -112,6 +114,8 @@ public class Spiteful_agent extends Agent {
 								state = State.s2Round;
 						} else if (msg.getContent().startsWith("GameOver#")) {
 							// Creo que no es necesario pero puede venir bien para el inteligente
+						} else if (msg.getContent().equals("Removed")) {
+							doDelete();
 						}
 					} else {
 						System.out.println(getAID().getName() + ":" + state.name() + " - Unexpected message");
@@ -130,6 +134,8 @@ public class Spiteful_agent extends Agent {
 						// Process changed message, in this case nothing
 					} else if (msg.getPerformative() == ACLMessage.INFORM && msg.getContent().startsWith("EndGame")) {
 						state = State.s1AwaitingGame;
+					} else if (msg.getContent().equals("Removed")) {
+						doDelete();
 					} else {
 						System.out.println(
 								getAID().getName() + ":" + state.name() + " - Unexpected message:" + msg.getContent());

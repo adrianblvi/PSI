@@ -497,11 +497,13 @@ public class MyGui extends javax.swing.JFrame {
 		jDialog2.setVisible(true);
 		jDialog2.setSize(400, 300);
 		jDialog2.setLocationRelativeTo(null);
-		mainAgent.deletePlayer("Random");
 	}
 
 	private void btnRemoveActionPerformed(java.awt.event.ActionEvent evt) {
-		// TODO add your handling code here:
+		String player = jTextPane1.getText();
+		mainAgent.deletePlayer(player);
+		this.removeRowPlayer(player);
+		jDialog2.dispose();
 	}
 
 	public void initTable(ArrayList<String> playersNames) {
@@ -523,6 +525,17 @@ public class MyGui extends javax.swing.JFrame {
 				model.setValueAt(points, i, 2);
 				model.setValueAt(avg, i, 3);
 				model.setValueAt(gamesWon, i, 4);
+			}
+		}
+	}
+
+	public void removeRowPlayer(String playerName) {
+		DefaultTableModel model = (DefaultTableModel) tablePlayers.getModel();
+		int rows = model.getRowCount();
+		for (int i = 0; i < rows; i++) {
+			if (model.getValueAt(i, 0).equals(playerName.trim())) {
+				model.removeRow(i);
+				return;
 			}
 		}
 	}

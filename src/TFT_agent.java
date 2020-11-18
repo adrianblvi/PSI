@@ -87,6 +87,8 @@ public class TFT_agent extends Agent {
 						if (parametersUpdated)
 							state = State.s1AwaitingGame;
 
+					} else if (msg.getPerformative() == ACLMessage.INFORM && msg.getContent().startsWith("Removed")) {
+						doDelete();
 					} else {
 						System.out.println(getAID().getName() + ":" + state.name() + " - Unexpected message");
 					}
@@ -109,6 +111,8 @@ public class TFT_agent extends Agent {
 							if (gameStarted)
 								state = State.s2Round;
 						} else if (msg.getContent().startsWith("GameOver#")) {
+						} else if (msg.getContent().startsWith("Removed")) {
+							doDelete();
 						}
 					} else {
 						System.out.println(getAID().getName() + ":" + state.name() + " - Unexpected message");
@@ -123,8 +127,8 @@ public class TFT_agent extends Agent {
 						writeLog(getAID().getName() + " sent " + msg.getContent());
 						send(msg);
 						state = State.s3AwaitingResult;
-					} else if (msg.getPerformative() == ACLMessage.INFORM && msg.getContent().startsWith("Changed#")) {
-						// Process changed message, in this case nothing
+					} else if (msg.getPerformative() == ACLMessage.INFORM && msg.getContent().startsWith("Removed")) {
+						doDelete();
 					} else if (msg.getPerformative() == ACLMessage.INFORM && msg.getContent().startsWith("EndGame")) {
 						state = State.s1AwaitingGame;
 					} else {

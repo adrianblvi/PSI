@@ -26,14 +26,14 @@ public class MainAgent extends Agent {
 	protected void setup() {
 		gui = new MyGui(this);
 		gui.setVisible(true);
-		updatePlayers();
+		updatePlayers(true);
 		gui.setNumberGames(0);
 		gui.setNumConfess(0);
 		gui.setNumBetray(0);
 		gui.setNumRounds(parameters.R);
 	}
 
-	public void updatePlayers() {
+	public void updatePlayers(boolean first) {
 		gui.log("Updating players list");
 		DFAgentDescription template = new DFAgentDescription();
 		ServiceDescription sd = new ServiceDescription();
@@ -58,7 +58,10 @@ public class MainAgent extends Agent {
 		}
 		parameters.N = playerNames.size();
 		gui.setNumberPlayers(parameters.N);
-		gui.initTable(playerNames);
+		if (first) {
+			gui.initTable(playerNames);
+		}
+
 	}
 
 	public void resetStats() {
@@ -90,10 +93,28 @@ public class MainAgent extends Agent {
 	}
 
 	public void deletePlayer(String playerName) {
-		System.out.println("Player Removed: " + playerName);
-		for (AID a : playerAgents) {
-			System.out.println(a.getLocalName());
+		AID removedPlayer = null;
+		for (int i = 0; i < playerAgents.length; i++) {
+			String aux = playerAgents[i].getLocalName().trim();
+			if (aux.trim().equals(playerName.trim())) {
+				removedPlayer = playerAgents[i];
+				ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+				msg = new ACLMessage(ACLMessage.INFORM);
+				msg.addReceiver(removedPlayer);
+				msg.setContent("Removed");
+				send(msg);
+				break;
+			}
 		}
+
+		if (removedPlayer == null) {
+			gui.log("This player doesnt exists");
+		} else {
+			gui.log("Player " + removedPlayer.getLocalName() + " removed");
+			writeLog("Player " + removedPlayer.getLocalName() + " removed");
+			updatePlayers(false);
+		}
+
 	}
 
 	private void writeLog(String log) {
@@ -153,7 +174,7 @@ public class MainAgent extends Agent {
 					}
 					int modification = (int) Math.floor(Math.random() * (parameters.nR) + 1);
 					System.out.println("Modification number: " + modification);
-					newRound = actualRound - modification;
+					newRound = (actualRound + 1) - modification;
 					System.out.println("Actual round updated: " + newRound);
 				}
 			}
@@ -285,7 +306,6 @@ public class MainAgent extends Agent {
 
 		private void modifiedR() {
 			nR = (int) (R - (0.9 * R));
-			System.out.println("NR: " + nR);
 		}
 	}
 
