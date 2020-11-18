@@ -89,8 +89,11 @@ public class MainAgent extends Agent {
 
 	}
 
-	public void deletePlayer() {
-
+	public void deletePlayer(String playerName) {
+		System.out.println("Player Removed: " + playerName);
+		for (AID a : playerAgents) {
+			System.out.println(a.getLocalName());
+		}
 	}
 
 	private void writeLog(String log) {

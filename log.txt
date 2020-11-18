@@ -2010,3 +2010,18 @@ NewGame#1,2
 random1@192.168.122.1:1099/JADE sent Action#D
 Spiteful@192.168.122.1:1099/JADE sent Action#D
 Results#1,2#D,D
+TFTAgent TFT@192.168.122.1:1099/JADE is ready.
+RandomAgent random1@192.168.122.1:1099/JADE is ready.
+SpitefulAgent Spiteful@192.168.122.1:1099/JADE is ready.
+RandomAgent random1@192.168.122.1:1099/JADE is ready.
+SpitefulAgent Spiteful@192.168.122.1:1099/JADE is ready.
+TFTAgent TFT@192.168.122.1:1099/JADE is ready.
+SpitefulAgent Spiteful@192.168.122.1:1099/JADE is ready.
+TFTAgent TFT@192.168.122.1:1099/JADE is ready.
+RandomAgent random1@192.168.122.1:1099/JADE is ready.
+SpitefulAgent Spiteful@192.168.122.1:1099/JADE is ready.
+TFTAgent TFT@192.168.122.1:1099/JADE is ready.
+RandomAgent random1@192.168.122.1:1099/JADE is ready.
+TFTAgent TFT@192.168.122.1:1099/JADE is ready.
+SpitefulAgent Spiteful@192.168.122.1:1099/JADE is ready.
+RandomAgent random1@192.168.122.1:1099/JADE is ready.
