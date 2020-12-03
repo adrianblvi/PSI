@@ -181,7 +181,11 @@ public class MainAgent extends Agent {
 
 		private void finalEnd(ArrayList<PlayerInformation> players) {
 			gui.log("Fin del juego");
-			sortPlayers(players);
+			gui.log("Sorting table");
+			Collections.sort(players);
+			for (PlayerInformation player : players) {
+				gui.log(player.aid.getLocalName());
+			}
 		}
 
 		private void playGame(PlayerInformation player1, PlayerInformation player2) {
@@ -282,14 +286,6 @@ public class MainAgent extends Agent {
 			return toRet;
 		}
 
-		private void sortPlayers(ArrayList<PlayerInformation> players) {
-			gui.log("Sorting table");
-			Collections.sort(players);
-			for (PlayerInformation player : players) {
-				gui.log(player.aid.getLocalName());
-			}
-		}
-
 		private void updateTable(PlayerInformation player) {
 			float avg = (float) player.payoff / player.gamesPlayed;
 			gui.updateTable(String.valueOf(player.aid.getLocalName()), String.valueOf(player.gamesPlayed),
@@ -328,7 +324,6 @@ public class MainAgent extends Agent {
 		int payoff;
 		int gamesPlayed;
 		int gamesWin;
-//		float avg;
 
 		public PlayerInformation(AID a, int i) {
 			aid = a;
@@ -338,8 +333,15 @@ public class MainAgent extends Agent {
 
 		@Override
 		public int compareTo(MainAgent.PlayerInformation player) {
-			String strAvg = String.valueOf(this.payoff / this.gamesPlayed);
-			int toRet = String.valueOf(player.payoff / player.gamesPlayed).compareTo(strAvg);
+			DecimalFormat format = new DecimalFormat("#.##");
+			int toRet = 0;
+			Double avg = Double.valueOf(this.payoff) / Double.valueOf(this.gamesPlayed);
+			Double plyrAvg = Double.valueOf(player.payoff) / Double.valueOf(player.gamesPlayed);
+			if (avg < plyrAvg) {
+				toRet = 1;
+			} else {
+				toRet = -1;
+			}
 			return toRet;
 		}
 
