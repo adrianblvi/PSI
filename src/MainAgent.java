@@ -2,6 +2,7 @@ import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import jade.core.AID;
 import jade.core.Agent;
@@ -173,11 +174,14 @@ public class MainAgent extends Agent {
 						}
 					}
 					int modification = (int) Math.floor(Math.random() * (parameters.nR) + 1);
-					System.out.println("Modification number: " + modification);
-					newRound = (actualRound + 1) - modification;
-					System.out.println("Actual round updated: " + newRound);
 				}
 			}
+			finalEnd(players);
+		}
+
+		private void finalEnd(ArrayList<PlayerInformation> players) {
+			gui.log("Fin del juego");
+			sortPlayers(players);
 		}
 
 		private void playGame(PlayerInformation player1, PlayerInformation player2) {
@@ -278,6 +282,14 @@ public class MainAgent extends Agent {
 			return toRet;
 		}
 
+		private void sortPlayers(ArrayList<PlayerInformation> players) {
+			gui.log("Sorting table");
+			Collections.sort(players);
+			for (PlayerInformation player : players) {
+				gui.log(player.aid.getLocalName());
+			}
+		}
+
 		private void updateTable(PlayerInformation player) {
 			float avg = (float) player.payoff / player.gamesPlayed;
 			gui.updateTable(String.valueOf(player.aid.getLocalName()), String.valueOf(player.gamesPlayed),
@@ -309,18 +321,27 @@ public class MainAgent extends Agent {
 		}
 	}
 
-	public class PlayerInformation {
+	public class PlayerInformation implements Comparable<PlayerInformation> {
 
 		AID aid;
 		int id;
 		int payoff;
 		int gamesPlayed;
 		int gamesWin;
+//		float avg;
 
 		public PlayerInformation(AID a, int i) {
 			aid = a;
 			id = i;
 			payoff = 0;
 		}
+
+		@Override
+		public int compareTo(MainAgent.PlayerInformation player) {
+			String strAvg = String.valueOf(this.payoff / this.gamesPlayed);
+			int toRet = String.valueOf(player.payoff / player.gamesPlayed).compareTo(strAvg);
+			return toRet;
+		}
+
 	}
 }
