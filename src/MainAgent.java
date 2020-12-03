@@ -182,9 +182,16 @@ public class MainAgent extends Agent {
 		private void finalEnd(ArrayList<PlayerInformation> players) {
 			gui.log("Fin del juego");
 			gui.log("Sorting table");
+			ArrayList<String> names = new ArrayList<>();
 			Collections.sort(players);
 			for (PlayerInformation player : players) {
 				gui.log(player.aid.getLocalName());
+				names.add(player.aid.getLocalName());
+			}
+			gui.clearTable(true);
+			gui.initTable(names);
+			for (PlayerInformation player : players) {
+				updateTable(player);
 			}
 		}
 
