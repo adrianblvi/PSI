@@ -193,6 +193,11 @@ public class MainAgent extends Agent {
 			for (PlayerInformation player : players) {
 				updateTable(player);
 			}
+			ArrayList<String> podium = new ArrayList<>();
+			for (int i = 0; i < 3; i++) {
+				podium.add(players.get(i).aid.getLocalName()+"-"+players.get(i).payoff);
+			}
+			//gui.showPodium(podium);
 		}
 
 		private void playGame(PlayerInformation player1, PlayerInformation player2) {
