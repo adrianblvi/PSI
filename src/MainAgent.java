@@ -174,6 +174,9 @@ public class MainAgent extends Agent {
 						}
 					}
 					int modification = (int) Math.floor(Math.random() * (parameters.nR) + 1);
+					System.out.println("Modification number: " + modification);
+					newRound = (actualRound + 1) - modification;
+					System.out.println("Actual round updated: " + newRound);
 				}
 			}
 			finalEnd(players);
@@ -195,9 +198,9 @@ public class MainAgent extends Agent {
 			}
 			ArrayList<String> podium = new ArrayList<>();
 			for (int i = 0; i < 3; i++) {
-				podium.add(players.get(i).aid.getLocalName()+"-"+players.get(i).payoff);
+				podium.add(players.get(i).aid.getLocalName() + "-" + players.get(i).payoff);
 			}
-			//gui.showPodium(podium);
+			// gui.showPodium(podium);
 		}
 
 		private void playGame(PlayerInformation player1, PlayerInformation player2) {

@@ -16,6 +16,9 @@ public class Pavlov_agent extends Agent {
 	private AID mainAgent;
 	private int myId, opponentId;
 	private int N, R;
+	private boolean isSuccessful;
+	private int newGame = 0;
+	private String lastAction;
 	private ACLMessage msg;
 
 	protected void setup() {
@@ -33,7 +36,6 @@ public class Pavlov_agent extends Agent {
 			fe.printStackTrace();
 		}
 		addBehaviour(new Play());
-		System.out.println("PavlovAgent " + getAID().getName() + " is ready.");
 
 	}
 
@@ -100,8 +102,8 @@ public class Pavlov_agent extends Agent {
 					if (msg.getPerformative() == ACLMessage.REQUEST /* && msg.getContent().startsWith("Position") */) {
 						ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 						msg.addReceiver(mainAgent);
-						msg.setContent("Action#" + randomOption());// In other agents is here where he have to codify
-																	// the decission
+						msg.setContent("Action#" + decideMovement());// In other agents is here where he have to codify
+																		// the decission
 						writeLog(getAID().getName() + " sent " + msg.getContent());
 						send(msg);
 						state = State.s3AwaitingResult;
@@ -131,32 +133,53 @@ public class Pavlov_agent extends Agent {
 		}
 
 		private void validateResultMessage(ACLMessage msg) {
-			// System.out.println("Processing the results... ");
+			int pos, rival;
+			String msgContent = msg.getContent();
+			String[] contentSplit = msgContent.split("#");
+			String[] idSplit = contentSplit[1].trim().split(",");
+			if (Integer.parseInt(idSplit[0]) == myId) {
+				pos = 1;
+				rival = 0;
+			} else {
+				pos = 0;
+				rival = 1;
+			}
+			String[] actions = contentSplit[2].trim().split(",");
+			lastAction = actions[pos];
+
+			if (actions[rival].equals("C")) {
+				isSuccessful = true;
+			} else {
+				isSuccessful = false;
+			}
 
 		}
 
-		private void writeLog(String log) {
-			FileWriter fichero = null;
-			PrintWriter pw = null;
+	}
+
+	private void writeLog(String log) {
+		FileWriter fichero = null;
+		PrintWriter pw = null;
+		try {
+			fichero = new FileWriter("log.txt", true);
+			pw = new PrintWriter(fichero);
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
 			try {
-				fichero = new FileWriter("log.txt", true);
-				pw = new PrintWriter(fichero);
-			} catch (Exception e) {
-				e.printStackTrace();
-			} finally {
-				try {
-					pw.write(log + "\n");
-					if (null != fichero)
-						fichero.close();
-				} catch (Exception e2) {
-					e2.printStackTrace();
-				}
+				pw.write(log + "\n");
+				if (null != fichero)
+					fichero.close();
+			} catch (Exception e2) {
+				e2.printStackTrace();
 			}
 		}
+	}
 
-		private String randomOption() {
+	private String decideMovement() {
+		String answer = "";
+		if (newGame == 0) {
 			int valorDado = (int) Math.floor(Math.random() * 2 + 1);
-			String answer = "";
 			switch (valorDado) {
 			case 1:
 				answer = "D";
@@ -168,55 +191,66 @@ public class Pavlov_agent extends Agent {
 				answer = "Error";
 				break;
 			}
-			return answer;
+		} else {
+			if (isSuccessful) {
+				answer = lastAction;
+			} else {
+				if (lastAction.equals("C")) {
+					answer = "D";
+				} else {
+					answer = "C";
+				}
+			}
 		}
+		newGame++;
+		return answer;
+	}
 
-		private boolean validateSetupMessage(ACLMessage msg) throws NumberFormatException {
-			int tN, tR, tMyId;
-			String msgContent = msg.getContent();
+	private boolean validateSetupMessage(ACLMessage msg) throws NumberFormatException {
+		int tN, tR, tMyId;
+		String msgContent = msg.getContent();
 
-			String[] contentSplit = msgContent.split("#");
-			if (contentSplit.length != 3)
-				return false;
-			if (!contentSplit[0].equals("Id"))
-				return false;
-			tMyId = Integer.parseInt(contentSplit[1]);
+		String[] contentSplit = msgContent.split("#");
+		if (contentSplit.length != 3)
+			return false;
+		if (!contentSplit[0].equals("Id"))
+			return false;
+		tMyId = Integer.parseInt(contentSplit[1]);
 
-			String[] parametersSplit = contentSplit[2].split(",");
-			if (parametersSplit.length != 2)
-				return false;
-			tN = Integer.parseInt(parametersSplit[0]);
-			tR = Integer.parseInt(parametersSplit[1]);
+		String[] parametersSplit = contentSplit[2].split(",");
+		if (parametersSplit.length != 2)
+			return false;
+		tN = Integer.parseInt(parametersSplit[0]);
+		tR = Integer.parseInt(parametersSplit[1]);
 
-			mainAgent = msg.getSender();
-			N = tN;
-			R = tR;
-			myId = tMyId;
+		mainAgent = msg.getSender();
+		N = tN;
+		R = tR;
+		myId = tMyId;
+		newGame = 0;
+		return true;
+	}
+
+	public boolean validateNewGame(String msgContent) {
+		int msgId0, msgId1;
+		String[] contentSplit = msgContent.split("#");
+		if (contentSplit.length != 2)
+			return false;
+		if (!contentSplit[0].equals("NewGame"))
+			return false;
+		String[] idSplit = contentSplit[1].split(",");
+		if (idSplit.length != 2)
+			return false;
+		msgId0 = Integer.parseInt(idSplit[0]);
+		msgId1 = Integer.parseInt(idSplit[1]);
+		if (myId == msgId0) {
+			opponentId = msgId1;
+			return true;
+		} else if (myId == msgId1) {
+			opponentId = msgId0;
 			return true;
 		}
-
-		public boolean validateNewGame(String msgContent) {
-			int msgId0, msgId1;
-			String[] contentSplit = msgContent.split("#");
-			if (contentSplit.length != 2)
-				return false;
-			if (!contentSplit[0].equals("NewGame"))
-				return false;
-			String[] idSplit = contentSplit[1].split(",");
-			if (idSplit.length != 2)
-				return false;
-			msgId0 = Integer.parseInt(idSplit[0]);
-			msgId1 = Integer.parseInt(idSplit[1]);
-			if (myId == msgId0) {
-				opponentId = msgId1;
-				return true;
-			} else if (myId == msgId1) {
-				opponentId = msgId0;
-				return true;
-			}
-			return false;
-		}
-
+		return false;
 	}
 
 }
