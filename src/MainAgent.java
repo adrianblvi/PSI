@@ -196,6 +196,7 @@ public class MainAgent extends Agent {
 			for (PlayerInformation player : players) {
 				updateTable(player);
 			}
+			gui.showWinner(players.get(0).aid.getLocalName(), players.get(0).payoff, players.get(0).gamesPlayed);
 		}
 
 		private void playGame(PlayerInformation player1, PlayerInformation player2) {

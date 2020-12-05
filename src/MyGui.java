@@ -3,6 +3,7 @@ import java.awt.Dimension;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import javax.swing.JTextArea;
@@ -578,6 +579,15 @@ public class MyGui extends javax.swing.JFrame {
 
 	public void setNumRounds(int numRounds) {
 		this.txpRounds.setText(String.valueOf(numRounds));
+	}
+
+	public void showWinner(String name, double points, double avg) {
+		WinnerDialog winner = new WinnerDialog(this, false);
+		DecimalFormat format = new DecimalFormat("#.###");
+		String finalavg = format.format(points / avg);
+		winner.setWinnerText(name, String.valueOf(points), String.valueOf(finalavg));
+		winner.setVisible(true);
+		winner.setLocationRelativeTo(null);
 	}
 
 	public void log(String log) {
