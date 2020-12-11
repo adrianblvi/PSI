@@ -272,6 +272,12 @@ public class MainAgent extends Agent {
 		private void endGame(PlayerInformation player1, PlayerInformation player2) {
 
 			String avgTotal = obtainAvgGame();
+			String[] avgSplit = avgTotal.split(",");
+			if (Integer.valueOf(avgSplit[0]) > Integer.valueOf(avgSplit[1])) {
+				player1.gamesWin++;
+			} else {
+				player2.gamesWin++;
+			}
 			ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 			msg.addReceiver(player1.aid);
 			msg.addReceiver(player2.aid);

@@ -179,18 +179,8 @@ public class Pavlov_agent extends Agent {
 	private String decideMovement() {
 		String answer = "";
 		if (newGame == 0) {
-			int valorDado = (int) Math.floor(Math.random() * 2 + 1);
-			switch (valorDado) {
-			case 1:
-				answer = "D";
-				break;
-			case 2:
-				answer = "C";
-				break;
-			default:
-				answer = "Error";
-				break;
-			}
+			answer = "C";
+			lastAction = answer;
 		} else {
 			if (isSuccessful) {
 				answer = lastAction;
