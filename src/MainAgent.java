@@ -34,6 +34,12 @@ public class MainAgent extends Agent {
 		gui.setNumRounds(parameters.R);
 	}
 
+	/**
+	 * Update the list of players before a new game
+	 * 
+	 * @param first indicates if it's the first match
+	 */
+
 	public void updatePlayers(boolean first) {
 		gui.log("Updating players list");
 		DFAgentDescription template = new DFAgentDescription();
@@ -65,6 +71,9 @@ public class MainAgent extends Agent {
 
 	}
 
+	/**
+	 * Reset the stats in the gui
+	 */
 	public void resetStats() {
 		gui.setNumberGames(0);
 		gui.setNumConfess(0);
@@ -72,27 +81,48 @@ public class MainAgent extends Agent {
 		gui.clearTable(false);
 	}
 
+	/**
+	 * It's call when the start game button is cliked.
+	 * 
+	 * 
+	 */
 	public int newGame() {
 		avgList = new ArrayList<>();
 		addBehaviour(new GameManager());
 		return 0;
 	}
 
+	/**
+	 * Change the value of the variable stop to pause the game
+	 */
 	public void setStop() {
 		stop = true;
 	}
 
+	/**
+	 * Change the value of the variable stop to resume the game
+	 */
 	public void setResume() {
 		stop = false;
 		doWake();
 	}
 
+	/**
+	 * Change the value of the number of rounds
+	 * 
+	 * @param newNumRounds
+	 */
 	public void newNumRounds(int newNumRounds) {
 		parameters.R = newNumRounds;
 		parameters.modifiedR();
 
 	}
 
+	/**
+	 * Removes a player
+	 * 
+	 * @param playerName name of the player to be removed
+	 */
 	public void deletePlayer(String playerName) {
 		AID removedPlayer = null;
 		for (int i = 0; i < playerAgents.length; i++) {
@@ -118,6 +148,11 @@ public class MainAgent extends Agent {
 
 	}
 
+	/**
+	 * This function is used to debug
+	 * 
+	 * @param log String to print in the txt file
+	 */
 	private void writeLog(String log) {
 		FileWriter fichero = null;
 		PrintWriter pw = null;
@@ -155,7 +190,7 @@ public class MainAgent extends Agent {
 				msg.setContent("Id#" + player.id + "#" + parameters.N + "," + parameters.R);
 				msg.addReceiver(player.aid);
 				send(msg);
-				writeLog("Id#" + player.id + "#" + parameters.N + "," + parameters.R);
+				gui.log("Id#" + player.id + "#" + parameters.N + "," + parameters.R);
 			}
 			int actualRound = parameters.R;
 			int newRound = parameters.R;
@@ -174,22 +209,37 @@ public class MainAgent extends Agent {
 						}
 					}
 					int modification = (int) Math.floor(Math.random() * (parameters.nR) + 1);
-					System.out.println("Modification number: " + modification);
 					newRound = (actualRound + 1) - modification;
-					System.out.println("Actual round updated: " + newRound);
 				}
 			}
 			finalEnd(players);
 		}
 
+		/**
+		 * Sorts the table when all the games are played and decide the winner
+		 * 
+		 * @param players list of players
+		 */
 		private void finalEnd(ArrayList<PlayerInformation> players) {
 			gui.log("Fin del juego");
 			gui.log("Sorting table");
 			ArrayList<String> names = new ArrayList<>();
 			Collections.sort(players);
+			int i = 1;
+			String sufix = "";
 			for (PlayerInformation player : players) {
-				gui.log(player.aid.getLocalName());
+				if (i == 1) {
+					sufix = "st";
+				} else if (i == 2) {
+					sufix = "nd";
+				} else if (i == 3) {
+					sufix = "rd";
+				} else {
+					sufix = "th";
+				}
+				gui.log(i + sufix + " position: " + player.aid.getLocalName());
 				names.add(player.aid.getLocalName());
+				i++;
 			}
 			gui.clearTable(true);
 			gui.initTable(names);
@@ -197,6 +247,7 @@ public class MainAgent extends Agent {
 				updateTable(player);
 			}
 			gui.showWinner(players.get(0).aid.getLocalName(), players.get(0).payoff, players.get(0).gamesPlayed);
+			gui.btnStop.setEnabled(false);
 		}
 
 		private void playGame(PlayerInformation player1, PlayerInformation player2) {
@@ -205,7 +256,7 @@ public class MainAgent extends Agent {
 			msg.addReceiver(player2.aid);
 			msg.setContent("NewGame#" + player1.id + "," + player2.id);
 			send(msg);
-			writeLog("NewGame#" + player1.id + "," + player2.id);
+			gui.log("NewGame#" + player1.id + "," + player2.id);
 
 			msg = new ACLMessage(ACLMessage.REQUEST);
 			msg.setContent("Action");
@@ -228,9 +279,18 @@ public class MainAgent extends Agent {
 			msg.addReceiver(player2.aid);
 			msg.setContent("Results#" + player1.id + "," + player2.id + "#" + action1 + "," + action2);
 			send(msg);
-			writeLog("Results#" + player1.id + "," + player2.id + "#" + action1 + "," + action2);
+			gui.log("Results#" + player1.id + "," + player2.id + "#" + action1 + "," + action2);
 		}
 
+		/**
+		 * Evaluates the results and determine the payoffs
+		 * 
+		 * @param action1 Decission of the player 1
+		 * @param action2 Decission of the player 2
+		 * @param player1 Player
+		 * @param player2 Player
+		 * @return The decession of both players
+		 */
 		private String calculatePayoff(String action1, String action2, MainAgent.PlayerInformation player1,
 				MainAgent.PlayerInformation player2) {
 			String result = action1 + action2;
@@ -269,6 +329,12 @@ public class MainAgent extends Agent {
 			return retResult;
 		}
 
+		/**
+		 * Inform both players of the result of the match
+		 * 
+		 * @param player1
+		 * @param player2
+		 */
 		private void endGame(PlayerInformation player1, PlayerInformation player2) {
 
 			String avgTotal = obtainAvgGame();
@@ -282,14 +348,19 @@ public class MainAgent extends Agent {
 			msg.addReceiver(player1.aid);
 			msg.addReceiver(player2.aid);
 			msg.setContent("GameOver#" + player1.id + "," + player2.id + "#" + avgTotal);
-			writeLog("GameOver#" + player1.id + "," + player2.id + "#" + avgTotal);
+			gui.log("GameOver#" + player1.id + "," + player2.id + "#" + avgTotal);
 			send(msg);
-			gui.btnStop.setEnabled(false);
+			// gui.btnStop.setEnabled(false);
 			gui.newGame.setEnabled(true);
 			gui.removePlayer.setEnabled(true);
 			gui.resetPlayers.setEnabled(true);
 		}
 
+		/**
+		 * Calculates the average of points
+		 * 
+		 * @return the average of points
+		 */
 		private String obtainAvgGame() {
 			float avgPlayer1 = 0, avgPlayer2 = 0;
 			for (String string : avgList) {
@@ -303,6 +374,11 @@ public class MainAgent extends Agent {
 			return toRet;
 		}
 
+		/**
+		 * Updates the player's table in the gui
+		 * 
+		 * @param player
+		 */
 		private void updateTable(PlayerInformation player) {
 			float avg = (float) player.payoff / player.gamesPlayed;
 			gui.updateTable(String.valueOf(player.aid.getLocalName()), String.valueOf(player.gamesPlayed),
@@ -350,7 +426,6 @@ public class MainAgent extends Agent {
 
 		@Override
 		public int compareTo(MainAgent.PlayerInformation player) {
-			DecimalFormat format = new DecimalFormat("#.##");
 			int toRet = 0;
 			Double avg = Double.valueOf(this.payoff) / Double.valueOf(this.gamesPlayed);
 			Double plyrAvg = Double.valueOf(player.payoff) / Double.valueOf(player.gamesPlayed);
