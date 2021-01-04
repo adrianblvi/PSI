@@ -17,6 +17,8 @@ public class psi_17 extends Agent {
 	private int N, R;
 	private boolean isSuccessful;
 	private int newGame = 0;
+	private int defections = 0;
+	private int cooperations = 0;
 	private String lastAction;
 	private ACLMessage msg;
 
@@ -44,7 +46,7 @@ public class psi_17 extends Agent {
 		} catch (FIPAException e) {
 			e.printStackTrace();
 		}
-		System.out.println("PavlovAgent " + getAID().getName() + " terminating.");
+		System.out.println("Psi17 " + getAID().getName() + " terminating.");
 	}
 
 	private enum State {
@@ -147,9 +149,9 @@ public class psi_17 extends Agent {
 			lastAction = actions[pos];
 
 			if (actions[rival].equals("C")) {
-				isSuccessful = true;
+				cooperations++;
 			} else {
-				isSuccessful = false;
+				defections++;
 			}
 
 		}
@@ -178,27 +180,12 @@ public class psi_17 extends Agent {
 	private String decideMovement() {
 		String answer = "";
 		if (newGame == 0) {
-			int valorDado = (int) Math.floor(Math.random() * 2 + 1);
-			switch (valorDado) {
-			case 1:
-				answer = "D";
-				break;
-			case 2:
-				answer = "C";
-				break;
-			default:
-				answer = "Error";
-				break;
-			}
+			answer = "D";
 		} else {
-			if (isSuccessful) {
-				answer = lastAction;
+			if (defections > cooperations) {
+				answer = "D";
 			} else {
-				if (lastAction.equals("C")) {
-					answer = "D";
-				} else {
-					answer = "C";
-				}
+				answer = "C";
 			}
 		}
 		newGame++;
