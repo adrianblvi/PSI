@@ -198,7 +198,7 @@ public class MainAgent extends Agent {
 				for (int j = i + 1; j < players.size(); j++) {
 					for (int r = 0; r < newRound; r++) {
 						if (!stop) {
-							playGame(players.get(i), players.get(j));
+							playGame(players.get(i), players.get(j), r);
 							round++;
 							gui.setNumberGames(round);
 							if ((r + 1) == parameters.R) {
@@ -250,36 +250,41 @@ public class MainAgent extends Agent {
 			gui.btnStop.setEnabled(false);
 		}
 
-		private void playGame(PlayerInformation player1, PlayerInformation player2) {
+		private void playGame(PlayerInformation player1, PlayerInformation player2, int r) {
+
 			ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-			msg.addReceiver(player1.aid);
-			msg.addReceiver(player2.aid);
-			msg.setContent("NewGame#" + player1.id + "," + player2.id);
-			send(msg);
-			gui.log("NewGame#" + player1.id + "," + player2.id);
+			if (r == 0) {
+				msg = new ACLMessage(ACLMessage.INFORM);
+				msg.addReceiver(player1.aid);
+				msg.addReceiver(player2.aid);
+				msg.setContent("NewGame#" + player1.id + "#" + player2.id);
+				send(msg);
+				gui.log("NewGame#" + player1.id + "#" + player2.id);
+			} else {
 
-			msg = new ACLMessage(ACLMessage.REQUEST);
-			msg.setContent("Action");
-			msg.addReceiver(player1.aid);
-			send(msg);
+				msg = new ACLMessage(ACLMessage.REQUEST);
+				msg.setContent("Action");
+				msg.addReceiver(player1.aid);
+				send(msg);
 
-			ACLMessage move1 = blockingReceive();
-			String action1 = move1.getContent().split("#")[1];
+				ACLMessage move1 = blockingReceive();
+				String action1 = move1.getContent().split("#")[1];
 
-			msg = new ACLMessage(ACLMessage.REQUEST);
-			msg.setContent("Action");
-			msg.addReceiver(player2.aid);
-			send(msg);
+				msg = new ACLMessage(ACLMessage.REQUEST);
+				msg.setContent("Action");
+				msg.addReceiver(player2.aid);
+				send(msg);
 
-			ACLMessage move2 = blockingReceive();
-			String action2 = move2.getContent().split("#")[1];
-			avgList.add(calculatePayoff(action1, action2, player1, player2));
-			msg = new ACLMessage(ACLMessage.INFORM);
-			msg.addReceiver(player1.aid);
-			msg.addReceiver(player2.aid);
-			msg.setContent("Results#" + player1.id + "," + player2.id + "#" + action1 + "," + action2);
-			send(msg);
-			gui.log("Results#" + player1.id + "," + player2.id + "#" + action1 + "," + action2);
+				ACLMessage move2 = blockingReceive();
+				String action2 = move2.getContent().split("#")[1];
+				avgList.add(calculatePayoff(action1, action2, player1, player2));
+				msg = new ACLMessage(ACLMessage.INFORM);
+				msg.addReceiver(player1.aid);
+				msg.addReceiver(player2.aid);
+				msg.setContent("Results#" + player1.id + "," + player2.id + "#" + action1 + "," + action2);
+				send(msg);
+				gui.log("Results#" + player1.id + "," + player2.id + "#" + action1 + "," + action2);
+			}
 		}
 
 		/**

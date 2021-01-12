@@ -1,3 +1,5 @@
+package agents;
+
 import java.io.FileWriter;
 import java.io.PrintWriter;
 
@@ -10,14 +12,15 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 
-public class Pavlov_agent extends Agent {
-
+public class PSI_17 extends Agent {
 	private State state;
 	private AID mainAgent;
 	private int myId, opponentId;
 	private int N, R;
 	private boolean isSuccessful;
 	private int newGame = 0;
+	private int defections = 0;
+	private int cooperations = 0;
 	private String lastAction;
 	private ACLMessage msg;
 
@@ -45,7 +48,7 @@ public class Pavlov_agent extends Agent {
 		} catch (FIPAException e) {
 			e.printStackTrace();
 		}
-		System.out.println("PavlovAgent " + getAID().getName() + " terminating.");
+		System.out.println("Psi17 " + getAID().getName() + " terminating.");
 	}
 
 	private enum State {
@@ -87,6 +90,7 @@ public class Pavlov_agent extends Agent {
 							boolean gameStarted = false;
 							try {
 								gameStarted = validateNewGame(msg.getContent());
+
 							} catch (NumberFormatException e) {
 								System.out.println(getAID().getName() + ":" + state.name() + " - Bad message");
 							}
@@ -112,7 +116,7 @@ public class Pavlov_agent extends Agent {
 					} else if (msg.getPerformative() == ACLMessage.INFORM && msg.getContent().startsWith("GameOver#")) {
 						// state = State.s1AwaitingGame;
 						System.out.println("Fin de la partida");
-						state = State.s0NoConfig;
+						state = State.s1AwaitingGame;
 					} else {
 						System.out.println(
 								getAID().getName() + ":" + state.name() + " - Unexpected message:" + msg.getContent());
@@ -121,7 +125,7 @@ public class Pavlov_agent extends Agent {
 				case s3AwaitingResult:
 					if (msg.getPerformative() == ACLMessage.INFORM && msg.getContent().startsWith("Results#")) {
 						validateResultMessage(msg);
-						state = State.s1AwaitingGame;
+						state = State.s2Round;
 					} else {
 						System.out.println(getAID().getName() + ":" + state.name() + " - Unexpected message");
 					}
@@ -148,9 +152,9 @@ public class Pavlov_agent extends Agent {
 			lastAction = actions[pos];
 
 			if (actions[rival].equals("C")) {
-				isSuccessful = true;
+				cooperations++;
 			} else {
-				isSuccessful = false;
+				defections++;
 			}
 
 		}
@@ -179,17 +183,12 @@ public class Pavlov_agent extends Agent {
 	private String decideMovement() {
 		String answer = "";
 		if (newGame == 0) {
-			answer = "C";
-			lastAction = answer;
+			answer = "D";
 		} else {
-			if (isSuccessful) {
-				answer = lastAction;
+			if (defections > cooperations) {
+				answer = "D";
 			} else {
-				if (lastAction.equals("C")) {
-					answer = "D";
-				} else {
-					answer = "C";
-				}
+				answer = "C";
 			}
 		}
 		newGame++;
@@ -199,7 +198,6 @@ public class Pavlov_agent extends Agent {
 	private boolean validateSetupMessage(ACLMessage msg) throws NumberFormatException {
 		int tN, tR, tMyId;
 		String msgContent = msg.getContent();
-
 		String[] contentSplit = msgContent.split("#");
 		if (contentSplit.length != 3)
 			return false;
@@ -224,15 +222,16 @@ public class Pavlov_agent extends Agent {
 	public boolean validateNewGame(String msgContent) {
 		int msgId0, msgId1;
 		String[] contentSplit = msgContent.split("#");
-		if (contentSplit.length != 2)
+
+		if (contentSplit.length != 3) {
 			return false;
-		if (!contentSplit[0].equals("NewGame"))
+		}
+		if (!contentSplit[0].equals("NewGame")) {
 			return false;
-		String[] idSplit = contentSplit[1].split(",");
-		if (idSplit.length != 2)
-			return false;
-		msgId0 = Integer.parseInt(idSplit[0]);
-		msgId1 = Integer.parseInt(idSplit[1]);
+		}
+
+		msgId0 = Integer.parseInt(contentSplit[1]);
+		msgId1 = Integer.parseInt(contentSplit[2]);
 		if (myId == msgId0) {
 			opponentId = msgId1;
 			return true;

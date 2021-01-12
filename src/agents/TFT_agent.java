@@ -1,3 +1,5 @@
+package agents;
+
 import java.io.FileWriter;
 import java.io.PrintWriter;
 
@@ -127,9 +129,11 @@ public class TFT_agent extends Agent {
 						writeLog(getAID().getName() + " sent " + msg.getContent());
 						send(msg);
 						state = State.s3AwaitingResult;
-					} else if (msg.getPerformative() == ACLMessage.INFORM && msg.getContent().startsWith("Removed")) {
-						doDelete();
-					} else if (msg.getPerformative() == ACLMessage.INFORM && msg.getContent().startsWith("EndGame")) {
+					} else if (msg.getPerformative() == ACLMessage.INFORM && msg.getContent().startsWith("Changed#")) {
+						// Process changed message, in this case nothing
+					} else if (msg.getPerformative() == ACLMessage.INFORM && msg.getContent().startsWith("GameOver#")) {
+						// state = State.s1AwaitingGame;
+						System.out.println("Fin de la partida");
 						state = State.s1AwaitingGame;
 					} else {
 						System.out.println(
@@ -139,7 +143,7 @@ public class TFT_agent extends Agent {
 				case s3AwaitingResult:
 					if (msg.getPerformative() == ACLMessage.INFORM && msg.getContent().startsWith("Results#")) {
 						validateResultMessage(msg);
-						state = State.s1AwaitingGame;
+						state = State.s2Round;
 					} else {
 						System.out.println(getAID().getName() + ":" + state.name() + " - Unexpected message");
 					}
@@ -203,15 +207,13 @@ public class TFT_agent extends Agent {
 		public boolean validateNewGame(String msgContent) {
 			int msgId0, msgId1;
 			String[] contentSplit = msgContent.split("#");
-			if (contentSplit.length != 2)
+			if (contentSplit.length != 3)
 				return false;
 			if (!contentSplit[0].equals("NewGame"))
 				return false;
-			String[] idSplit = contentSplit[1].split(",");
-			if (idSplit.length != 2)
-				return false;
-			msgId0 = Integer.parseInt(idSplit[0]);
-			msgId1 = Integer.parseInt(idSplit[1]);
+
+			msgId0 = Integer.parseInt(contentSplit[1]);
+			msgId1 = Integer.parseInt(contentSplit[2]);
 			if (myId == msgId0) {
 				opponentId = msgId1;
 				return true;
